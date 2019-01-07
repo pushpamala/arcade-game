@@ -1,11 +1,15 @@
 // Enemies our player must avoid
-var Enemy = function() {
+var Enemy = function(x, y, speed) {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
+    this.x = x;
+    this.y = y;
+    this.defaultX = this.x;
+    this.speed = speed;
 };
 
 // Update the enemy's position, required method for game
@@ -14,7 +18,25 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
+    this.x = this.x + 50 * dt;
+    this.render();
+
+    if (this.x > 500) {
+        this.x = this.defaultX;
+    }
+    this.collide();
 };
+//collision method when player and ememy collides
+Enemy.prototype.collide = function() {
+    allEnemies.forEach(function(enemy) {
+        if ((player.x >= enemy.x && player.x <= enemy.x+101) && (player.y >= enemy.y && player.y <= enemy.y+171)) {
+            player.reset();
+        }
+        if ((enemy.x >= player.x && enemy.x <= player.x+101) && (enemy.y >= player.y && enemy.y <= player.y+171)) {
+            player.reset();
+        }
+    });
+}
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
@@ -25,11 +47,73 @@ Enemy.prototype.render = function() {
 // This class requires an update(), render() and
 // a handleInput() method.
 
+var Player = function(x, y, speed) {
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
+    this.sprite = 'images/char-pink-girl.png'
+};
 
+Player.prototype.update = function(dt) {
+
+};
+
+Player.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+//listen for key presses and moves the player location in the grid accordingly
+Player.prototype.handleInput = function(keyCode) {
+    switch (keyCode) {
+        case 'left':
+            this.x -= 50;
+            if (this.x < 1) {
+                this.x = 1;
+            }
+        break;
+        case 'right':
+            this.x += 50;
+            if (this.x > 400) {
+                this.x = 400;
+            }
+        break;
+        case 'up':
+            this.y -= 50;
+            if (this.y < 1) {
+                this.y = 1;
+                document.querySelector('#win').classList.remove('game-won');
+            }
+        break;
+        case 'down':
+        this.y += 50;
+        if (this.y > 400) {
+            this.y = 400;
+        }
+        break;
+        default:
+        break;
+    }
+    this.render();
+};
+//Resetting the Player location to the starting location
+Player.prototype.reset = function() {
+    this.x = 200;
+    this.y = 300;
+    this.render();    
+};
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
+var allEnemies = [
+    new Enemy(25, 60, 100),
+    new Enemy(50, 150, 200),
+    new Enemy(75, 230, 300),
+    new Enemy(150, 60, 50),
+    new Enemy(200, 150, 150)
+
+];
 // Place the player object in a variable called player
 
+var player = new Player(200, 300, 50);
 
 
 // This listens for key presses and sends the keys to your
@@ -44,3 +128,4 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
